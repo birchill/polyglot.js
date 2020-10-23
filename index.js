@@ -17,10 +17,7 @@
 
 'use strict';
 
-var forEach = require('for-each');
 var warning = require('warning');
-var has = require('has');
-var trim = require('string.prototype.trim');
 
 var warn = function warn(message) {
   warning(false, message);
@@ -50,31 +47,49 @@ var defaultPluralRules = {
   pluralTypes: {
     arabic: function (n) {
       // http://www.arabeyes.org/Plural_Forms
-      if (n < 3) { return n; }
+      if (n < 3) {
+        return n;
+      }
       var lastTwo = n % 100;
       if (lastTwo >= 3 && lastTwo <= 10) return 3;
       return lastTwo >= 11 ? 4 : 5;
     },
     bosnian_serbian: russianPluralGroups,
-    chinese: function () { return 0; },
+    chinese: function () {
+      return 0;
+    },
     croatian: russianPluralGroups,
-    french: function (n) { return n > 1 ? 1 : 0; },
-    german: function (n) { return n !== 1 ? 1 : 0; },
+    french: function (n) {
+      return n > 1 ? 1 : 0;
+    },
+    german: function (n) {
+      return n !== 1 ? 1 : 0;
+    },
     russian: russianPluralGroups,
     lithuanian: function (n) {
-      if (n % 10 === 1 && n % 100 !== 11) { return 0; }
-      return n % 10 >= 2 && n % 10 <= 9 && (n % 100 < 11 || n % 100 > 19) ? 1 : 2;
+      if (n % 10 === 1 && n % 100 !== 11) {
+        return 0;
+      }
+      return n % 10 >= 2 && n % 10 <= 9 && (n % 100 < 11 || n % 100 > 19)
+        ? 1
+        : 2;
     },
     czech: function (n) {
-      if (n === 1) { return 0; }
-      return (n >= 2 && n <= 4) ? 1 : 2;
+      if (n === 1) {
+        return 0;
+      }
+      return n >= 2 && n <= 4 ? 1 : 2;
     },
     polish: function (n) {
-      if (n === 1) { return 0; }
+      if (n === 1) {
+        return 0;
+      }
       var end = n % 10;
       return 2 <= end && end <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2;
     },
-    icelandic: function (n) { return (n % 10 !== 1 || n % 100 === 11) ? 1 : 0; },
+    icelandic: function (n) {
+      return n % 10 !== 1 || n % 100 === 11 ? 1 : 0;
+    },
     slovenian: function (n) {
       var lastTwo = n % 100;
       if (lastTwo === 1) {
@@ -87,7 +102,7 @@ var defaultPluralRules = {
         return 2;
       }
       return 3;
-    }
+    },
   },
 
   // Mapping from pluralization group to individual language codes/locales.
@@ -96,34 +111,65 @@ var defaultPluralRules = {
   pluralTypeToLanguages: {
     arabic: ['ar'],
     bosnian_serbian: ['bs-Latn-BA', 'bs-Cyrl-BA', 'srl-RS', 'sr-RS'],
-    chinese: ['id', 'id-ID', 'ja', 'ko', 'ko-KR', 'lo', 'ms', 'th', 'th-TH', 'zh'],
+    chinese: [
+      'id',
+      'id-ID',
+      'ja',
+      'ko',
+      'ko-KR',
+      'lo',
+      'ms',
+      'th',
+      'th-TH',
+      'zh',
+    ],
     croatian: ['hr', 'hr-HR'],
-    german: ['fa', 'da', 'de', 'en', 'es', 'fi', 'el', 'he', 'hi-IN', 'hu', 'hu-HU', 'it', 'nl', 'no', 'pt', 'sv', 'tr'],
+    german: [
+      'fa',
+      'da',
+      'de',
+      'en',
+      'es',
+      'fi',
+      'el',
+      'he',
+      'hi-IN',
+      'hu',
+      'hu-HU',
+      'it',
+      'nl',
+      'no',
+      'pt',
+      'sv',
+      'tr',
+    ],
     french: ['fr', 'tl', 'pt-br'],
     russian: ['ru', 'ru-RU'],
     lithuanian: ['lt'],
     czech: ['cs', 'cs-CZ', 'sk'],
     polish: ['pl'],
     icelandic: ['is'],
-    slovenian: ['sl-SL']
-  }
+    slovenian: ['sl-SL'],
+  },
 };
 
 function langToTypeMap(mapping) {
   var ret = {};
-  forEach(mapping, function (langs, type) {
-    forEach(langs, function (lang) {
+  for (const [type, langs] of Object.entries(mapping)) {
+    for (const lang of Object.values(langs)) {
       ret[lang] = type;
-    });
-  });
+    }
+  }
   return ret;
 }
 
 function pluralTypeName(pluralRules, locale) {
   var langToPluralType = langToTypeMap(pluralRules.pluralTypeToLanguages);
-  return langToPluralType[locale]
-    || langToPluralType[split.call(locale, /-/, 1)[0]]
-    || langToPluralType.en;
+  return (
+    langToPluralType[locale] ||
+    langToPluralType[split.call(locale, /-/, 1)[0]] ||
+    langToPluralType.en
+  );
 }
 
 function pluralTypeIndex(pluralRules, locale, count) {
@@ -139,7 +185,9 @@ function constructTokenRegex(opts) {
   var suffix = (opts && opts.suffix) || '}';
 
   if (prefix === delimiter || suffix === delimiter) {
-    throw new RangeError('"' + delimiter + '" token is reserved for pluralization');
+    throw new RangeError(
+      '"' + delimiter + '" token is reserved for pluralization'
+    );
   }
 
   return new RegExp(escape(prefix) + '(.*?)' + escape(suffix), 'g');
@@ -170,9 +218,17 @@ var defaultTokenRegex = /%\{(.*?)\}/g;
 //
 // You should pass in a third argument, the locale, to specify the correct plural type.
 // It defaults to `'en'` with 2 plural forms.
-function transformPhrase(phrase, substitutions, locale, tokenRegex, pluralRules) {
+function transformPhrase(
+  phrase,
+  substitutions,
+  locale,
+  tokenRegex,
+  pluralRules
+) {
   if (typeof phrase !== 'string') {
-    throw new TypeError('Polyglot.transformPhrase expects argument #1 to be string');
+    throw new TypeError(
+      'Polyglot.transformPhrase expects argument #1 to be string'
+    );
   }
 
   if (substitutions == null) {
@@ -184,19 +240,35 @@ function transformPhrase(phrase, substitutions, locale, tokenRegex, pluralRules)
   var pluralRulesOrDefault = pluralRules || defaultPluralRules;
 
   // allow number as a pluralization shortcut
-  var options = typeof substitutions === 'number' ? { smart_count: substitutions } : substitutions;
+  var options =
+    typeof substitutions === 'number'
+      ? { smart_count: substitutions }
+      : substitutions;
 
   // Select plural form: based on a phrase text that contains `n`
   // plural forms separated by `delimiter`, a `locale`, and a `substitutions.smart_count`,
   // choose the correct plural form. This is only done if `count` is set.
   if (options.smart_count != null && result) {
     var texts = split.call(result, delimiter);
-    result = trim(texts[pluralTypeIndex(pluralRulesOrDefault, locale || 'en', options.smart_count)] || texts[0]);
+    result = (
+      texts[
+        pluralTypeIndex(
+          pluralRulesOrDefault,
+          locale || 'en',
+          options.smart_count
+        )
+      ] || texts[0]
+    ).trim();
   }
 
   // Interpolate: Creates a `RegExp` object for each interpolation placeholder.
-  result = replace.call(result, interpolationRegex, function (expression, argument) {
-    if (!has(options, argument) || options[argument] == null) { return expression; }
+  result = replace.call(result, interpolationRegex, function (
+    expression,
+    argument
+  ) {
+    if (!options.hasOwnProperty(argument) || options[argument] == null) {
+      return expression;
+    }
     return options[argument];
   });
 
@@ -210,7 +282,8 @@ function Polyglot(options) {
   this.extend(opts.phrases || {});
   this.currentLocale = opts.locale || 'en';
   var allowMissing = opts.allowMissing ? transformPhrase : null;
-  this.onMissingKey = typeof opts.onMissingKey === 'function' ? opts.onMissingKey : allowMissing;
+  this.onMissingKey =
+    typeof opts.onMissingKey === 'function' ? opts.onMissingKey : allowMissing;
   this.warn = opts.warn || warn;
   this.tokenRegex = constructTokenRegex(opts.interpolation);
   this.pluralRules = opts.pluralRules || defaultPluralRules;
@@ -274,14 +347,14 @@ Polyglot.prototype.locale = function (newLocale) {
 //
 // This feature is used internally to support nested phrase objects.
 Polyglot.prototype.extend = function (morePhrases, prefix) {
-  forEach(morePhrases, function (phrase, key) {
+  for (const [key, phrase] of Object.entries(morePhrases)) {
     var prefixedKey = prefix ? prefix + '.' + key : key;
     if (typeof phrase === 'object') {
       this.extend(phrase, prefixedKey);
     } else {
       this.phrases[prefixedKey] = phrase;
     }
-  }, this);
+  }
 };
 
 // ### polyglot.unset(phrases)
@@ -299,14 +372,14 @@ Polyglot.prototype.unset = function (morePhrases, prefix) {
   if (typeof morePhrases === 'string') {
     delete this.phrases[morePhrases];
   } else {
-    forEach(morePhrases, function (phrase, key) {
+    for (const [key, phrase] of Object.entries(morePhrases)) {
       var prefixedKey = prefix ? prefix + '.' + key : key;
       if (typeof phrase === 'object') {
         this.unset(phrase, prefixedKey);
       } else {
         delete this.phrases[prefixedKey];
       }
-    }, this);
+    }
   }
 };
 
@@ -328,7 +401,6 @@ Polyglot.prototype.replace = function (newPhrases) {
   this.clear();
   this.extend(newPhrases);
 };
-
 
 // ### polyglot.t(key, options)
 //
@@ -364,23 +436,34 @@ Polyglot.prototype.t = function (key, options) {
     phrase = opts._;
   } else if (this.onMissingKey) {
     var onMissingKey = this.onMissingKey;
-    result = onMissingKey(key, opts, this.currentLocale, this.tokenRegex, this.pluralRules);
+    result = onMissingKey(
+      key,
+      opts,
+      this.currentLocale,
+      this.tokenRegex,
+      this.pluralRules
+    );
   } else {
     this.warn('Missing translation for key: "' + key + '"');
     result = key;
   }
   if (typeof phrase === 'string') {
-    result = transformPhrase(phrase, opts, this.currentLocale, this.tokenRegex, this.pluralRules);
+    result = transformPhrase(
+      phrase,
+      opts,
+      this.currentLocale,
+      this.tokenRegex,
+      this.pluralRules
+    );
   }
   return result;
 };
-
 
 // ### polyglot.has(key)
 //
 // Check if polyglot has a translation for given key
 Polyglot.prototype.has = function (key) {
-  return has(this.phrases, key);
+  return this.phrases.hasOwnProperty(key);
 };
 
 // export transformPhrase

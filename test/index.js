@@ -2,14 +2,13 @@
 
 var Polyglot = require('../');
 var expect = require('chai').expect;
-var forEach = require('for-each');
 
 describe('t', function () {
   var phrases = {
     hello: 'Hello',
     hi_name_welcome_to_place: 'Hi, %{name}, welcome to %{place}!',
     name_your_name_is_name: '%{name}, your name is %{name}!',
-    empty_string: ''
+    empty_string: '',
   };
 
   var polyglot;
@@ -26,73 +25,102 @@ describe('t', function () {
   });
 
   it('interpolates', function () {
-    expect(polyglot.t('hi_name_welcome_to_place', {
-      name: 'Spike',
-      place: 'the webz'
-    })).to.equal('Hi, Spike, welcome to the webz!');
+    expect(
+      polyglot.t('hi_name_welcome_to_place', {
+        name: 'Spike',
+        place: 'the webz',
+      })
+    ).to.equal('Hi, Spike, welcome to the webz!');
   });
 
   it('interpolates with missing substitutions', function () {
-    expect(polyglot.t('hi_name_welcome_to_place', {
-      place: undefined
-    })).to.equal('Hi, %{name}, welcome to %{place}!');
+    expect(
+      polyglot.t('hi_name_welcome_to_place', {
+        place: undefined,
+      })
+    ).to.equal('Hi, %{name}, welcome to %{place}!');
   });
 
   it('interpolates the same placeholder multiple times', function () {
-    expect(polyglot.t('name_your_name_is_name', {
-      name: 'Spike'
-    })).to.equal('Spike, your name is Spike!');
+    expect(
+      polyglot.t('name_your_name_is_name', {
+        name: 'Spike',
+      })
+    ).to.equal('Spike, your name is Spike!');
   });
 
   it('allows you to supply default values', function () {
-    expect(polyglot.t('can_i_call_you_name', {
-      _: 'Can I call you %{name}?',
-      name: 'Robert'
-    })).to.equal('Can I call you Robert?');
+    expect(
+      polyglot.t('can_i_call_you_name', {
+        _: 'Can I call you %{name}?',
+        name: 'Robert',
+      })
+    ).to.equal('Can I call you Robert?');
   });
 
   it('returns the non-interpolated key if not initialized with allowMissing and translation not found', function () {
-    expect(polyglot.t('Welcome %{name}', {
-      name: 'Robert'
-    })).to.equal('Welcome %{name}');
+    expect(
+      polyglot.t('Welcome %{name}', {
+        name: 'Robert',
+      })
+    ).to.equal('Welcome %{name}');
   });
 
   it('returns an interpolated key if initialized with allowMissing and translation not found', function () {
     var instance = new Polyglot({ phrases: phrases, allowMissing: true });
-    expect(instance.t('Welcome %{name}', {
-      name: 'Robert'
-    })).to.equal('Welcome Robert');
+    expect(
+      instance.t('Welcome %{name}', {
+        name: 'Robert',
+      })
+    ).to.equal('Welcome Robert');
   });
 
   describe('custom interpolation syntax', function () {
     var createWithInterpolation = function (interpolation) {
-      return new Polyglot({ phrases: {}, allowMissing: true, interpolation: interpolation });
+      return new Polyglot({
+        phrases: {},
+        allowMissing: true,
+        interpolation: interpolation,
+      });
     };
 
     it('interpolates with the specified custom token syntax', function () {
       var instance = createWithInterpolation({ prefix: '{{', suffix: '}}' });
-      expect(instance.t('Welcome {{name}}', {
-        name: 'Robert'
-      })).to.equal('Welcome Robert');
+      expect(
+        instance.t('Welcome {{name}}', {
+          name: 'Robert',
+        })
+      ).to.equal('Welcome Robert');
     });
 
     it('interpolates if the prefix and suffix are the same', function () {
       var instance = createWithInterpolation({ prefix: '|', suffix: '|' });
-      expect(instance.t('Welcome |name|, how are you, |name|?', {
-        name: 'Robert'
-      })).to.equal('Welcome Robert, how are you, Robert?');
+      expect(
+        instance.t('Welcome |name|, how are you, |name|?', {
+          name: 'Robert',
+        })
+      ).to.equal('Welcome Robert, how are you, Robert?');
     });
 
     it('interpolates when using regular expression tokens', function () {
-      var instance = createWithInterpolation({ prefix: '\\s.*', suffix: '\\d.+' });
-      expect(instance.t('Welcome \\s.*name\\d.+', {
-        name: 'Robert'
-      })).to.equal('Welcome Robert');
+      var instance = createWithInterpolation({
+        prefix: '\\s.*',
+        suffix: '\\d.+',
+      });
+      expect(
+        instance.t('Welcome \\s.*name\\d.+', {
+          name: 'Robert',
+        })
+      ).to.equal('Welcome Robert');
     });
 
     it('throws an error when either prefix or suffix equals to pluralization delimiter', function () {
-      expect(function () { createWithInterpolation({ prefix: '||||', suffix: '}}' }); }).to.throw(RangeError);
-      expect(function () { createWithInterpolation({ prefix: '{{', suffix: '||||' }); }).to.throw(RangeError);
+      expect(function () {
+        createWithInterpolation({ prefix: '||||', suffix: '}}' });
+      }).to.throw(RangeError);
+      expect(function () {
+        createWithInterpolation({ prefix: '{{', suffix: '||||' });
+      }).to.throw(RangeError);
     });
   });
 
@@ -105,10 +133,12 @@ describe('t', function () {
   });
 
   it('handles dollar signs in the substitution value', function () {
-    expect(polyglot.t('hi_name_welcome_to_place', {
-      name: '$abc $0',
-      place: '$1 $&'
-    })).to.equal('Hi, $abc $0, welcome to $1 $&!');
+    expect(
+      polyglot.t('hi_name_welcome_to_place', {
+        name: '$abc $0',
+        place: '$1 $&',
+      })
+    ).to.equal('Hi, $abc $0, welcome to $1 $&!');
   });
 
   it('supports nested phrase objects', function () {
@@ -117,10 +147,10 @@ describe('t', function () {
         presentations: 'Presentations',
         hi_user: 'Hi, %{user}.',
         cta: {
-          join_now: 'Join now!'
-        }
+          join_now: 'Join now!',
+        },
       },
-      'header.sign_in': 'Sign In'
+      'header.sign_in': 'Sign In',
     };
     var instance = new Polyglot({ phrases: nestedPhrases });
     expect(instance.t('nav.presentations')).to.equal('Presentations');
@@ -141,7 +171,10 @@ describe('t', function () {
         expect(locale).to.equal(expectedLocale);
         return returnValue;
       };
-      var instance = new Polyglot({ onMissingKey: onMissingKey, locale: expectedLocale });
+      var instance = new Polyglot({
+        onMissingKey: onMissingKey,
+        locale: expectedLocale,
+      });
       var result = instance.t(expectedKey, expectedOptions);
       expect(result).to.equal(returnValue);
     });
@@ -152,7 +185,10 @@ describe('t', function () {
         expect(key).to.equal(missingKey);
         done();
       };
-      var instance = new Polyglot({ onMissingKey: onMissingKey, allowMissing: true });
+      var instance = new Polyglot({
+        onMissingKey: onMissingKey,
+        allowMissing: true,
+      });
       instance.t(missingKey);
     });
   });
@@ -160,7 +196,7 @@ describe('t', function () {
 
 describe('pluralize', function () {
   var phrases = {
-    count_name: '%{smart_count} Name |||| %{smart_count} Names'
+    count_name: '%{smart_count} Name |||| %{smart_count} Names',
   };
 
   var polyglot;
@@ -198,10 +234,10 @@ describe('locale-specific pluralization rules', function () {
       'صوتان',
       '%{smart_count} أصوات',
       '%{smart_count} صوت',
-      '%{smart_count} صوت'
+      '%{smart_count} صوت',
     ];
     var phrases = {
-      n_votes: whatSomeoneTranslated.join(' |||| ')
+      n_votes: whatSomeoneTranslated.join(' |||| '),
     };
 
     var polyglot = new Polyglot({ phrases: phrases, locale: 'ar' });
@@ -219,10 +255,10 @@ describe('locale-specific pluralization rules', function () {
     var whatSomeoneTranslated = [
       '%{smart_count} машина',
       '%{smart_count} машины',
-      '%{smart_count} машин'
+      '%{smart_count} машин',
     ];
     var phrases = {
-      n_votes: whatSomeoneTranslated.join(' |||| ')
+      n_votes: whatSomeoneTranslated.join(' |||| '),
     };
 
     var polyglotLanguageCode = new Polyglot({ phrases: phrases, locale: 'ru' });
@@ -257,10 +293,10 @@ describe('locale-specific pluralization rules', function () {
     var whatSomeoneTranslated = [
       '%{smart_count} gost',
       '%{smart_count} gosta',
-      '%{smart_count} gostiju'
+      '%{smart_count} gostiju',
     ];
     var phrases = {
-      n_guests: whatSomeoneTranslated.join(' |||| ')
+      n_guests: whatSomeoneTranslated.join(' |||| '),
     };
 
     var polyglotLocale = new Polyglot({ phrases: phrases, locale: 'hr-HR' });
@@ -286,35 +322,71 @@ describe('locale-specific pluralization rules', function () {
     var whatSomeoneTranslated = [
       '%{smart_count} glas',
       '%{smart_count} glasa',
-      '%{smart_count} glasova'
+      '%{smart_count} glasova',
     ];
     var phrases = {
-      n_votes: whatSomeoneTranslated.join(' |||| ')
+      n_votes: whatSomeoneTranslated.join(' |||| '),
     };
 
     var polyglotLocale = new Polyglot({ phrases: phrases, locale: 'hr-HR' });
 
-    forEach([1, 21, 31, 101], function (c) {
+    for (const c of [1, 21, 31, 101]) {
       expect(polyglotLocale.t('n_votes', c)).to.equal(c + ' glas');
-    });
-    forEach([2, 3, 4, 22, 23, 24, 32, 33, 34], function (c) {
+    }
+    for (const c of [2, 3, 4, 22, 23, 24, 32, 33, 34]) {
       expect(polyglotLocale.t('n_votes', c)).to.equal(c + ' glasa');
-    });
-    forEach([0, 5, 6, 11, 12, 13, 14, 15, 16, 17, 25, 26, 35, 36, 112, 113, 114], function (c) {
+    }
+    for (const c of [
+      0,
+      5,
+      6,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      25,
+      26,
+      35,
+      36,
+      112,
+      113,
+      114,
+    ]) {
       expect(polyglotLocale.t('n_votes', c)).to.equal(c + ' glasova');
-    });
+    }
 
     var polyglotLanguageCode = new Polyglot({ phrases: phrases, locale: 'hr' });
 
-    forEach([1, 21, 31, 101], function (c) {
+    for (const c of [1, 21, 31, 101]) {
       expect(polyglotLanguageCode.t('n_votes', c)).to.equal(c + ' glas');
-    });
-    forEach([2, 3, 4, 22, 23, 24, 32, 33, 34], function (c) {
+    }
+    for (const c of [2, 3, 4, 22, 23, 24, 32, 33, 34]) {
       expect(polyglotLanguageCode.t('n_votes', c)).to.equal(c + ' glasa');
-    });
-    forEach([0, 5, 6, 11, 12, 13, 14, 15, 16, 17, 25, 26, 35, 36, 112, 113, 114], function (c) {
+    }
+    for (const c of [
+      0,
+      5,
+      6,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      25,
+      26,
+      35,
+      36,
+      112,
+      113,
+      114,
+    ]) {
       expect(polyglotLanguageCode.t('n_votes', c)).to.equal(c + ' glasova');
-    });
+    }
   });
 
   it('pluralizes in Serbian (Latin & Cyrillic)', function () {
@@ -322,10 +394,10 @@ describe('locale-specific pluralization rules', function () {
     var whatSomeoneTranslated = [
       '%{smart_count} miš',
       '%{smart_count} miša',
-      '%{smart_count} miševa'
+      '%{smart_count} miševa',
     ];
     var phrases = {
-      n_votes: whatSomeoneTranslated.join(' |||| ')
+      n_votes: whatSomeoneTranslated.join(' |||| '),
     };
 
     var polyglotLatin = new Polyglot({ phrases: phrases, locale: 'srl-RS' });
@@ -360,13 +432,16 @@ describe('locale-specific pluralization rules', function () {
     var whatSomeoneTranslated = [
       '%{smart_count} članak',
       '%{smart_count} članka',
-      '%{smart_count} članaka'
+      '%{smart_count} članaka',
     ];
     var phrases = {
-      n_votes: whatSomeoneTranslated.join(' |||| ')
+      n_votes: whatSomeoneTranslated.join(' |||| '),
     };
 
-    var polyglotLatin = new Polyglot({ phrases: phrases, locale: 'bs-Latn-BA' });
+    var polyglotLatin = new Polyglot({
+      phrases: phrases,
+      locale: 'bs-Latn-BA',
+    });
 
     expect(polyglotLatin.t('n_votes', 1)).to.equal('1 članak');
     expect(polyglotLatin.t('n_votes', 11)).to.equal('11 članaka');
@@ -383,7 +458,10 @@ describe('locale-specific pluralization rules', function () {
     expect(polyglotLatin.t('n_votes', 115)).to.equal('115 članaka');
     expect(polyglotLatin.t('n_votes', 0)).to.equal('0 članaka');
 
-    var polyglotCyrillic = new Polyglot({ phrases: phrases, locale: 'bs-Cyrl-BA' });
+    var polyglotCyrillic = new Polyglot({
+      phrases: phrases,
+      locale: 'bs-Cyrl-BA',
+    });
 
     expect(polyglotCyrillic.t('n_votes', 1)).to.equal('1 članak');
     expect(polyglotCyrillic.t('n_votes', 11)).to.equal('11 članaka');
@@ -406,10 +484,10 @@ describe('locale-specific pluralization rules', function () {
     var whatSomeoneTranslated = [
       '%{smart_count} komentář',
       '%{smart_count} komentáře',
-      '%{smart_count} komentářů'
+      '%{smart_count} komentářů',
     ];
     var phrases = {
-      n_votes: whatSomeoneTranslated.join(' |||| ')
+      n_votes: whatSomeoneTranslated.join(' |||| '),
     };
 
     var polyglot = new Polyglot({ phrases: phrases, locale: 'cs-CZ' });
@@ -430,50 +508,54 @@ describe('locale-specific pluralization rules', function () {
       '%{smart_count} komentar',
       '%{smart_count} komentarja',
       '%{smart_count} komentarji',
-      '%{smart_count} komentarjev'
+      '%{smart_count} komentarjev',
     ];
     var phrases = {
-      n_votes: whatSomeoneTranslated.join(' |||| ')
+      n_votes: whatSomeoneTranslated.join(' |||| '),
     };
 
     var polyglot = new Polyglot({ phrases: phrases, locale: 'sl-SL' });
 
-    forEach([1, 12301, 101, 1001, 201, 301], function (c) {
+    for (const c of [1, 12301, 101, 1001, 201, 301]) {
       expect(polyglot.t('n_votes', c)).to.equal(c + ' komentar');
-    });
+    }
 
-    forEach([2, 102, 202, 302], function (c) {
+    for (const c of [2, 102, 202, 302]) {
       expect(polyglot.t('n_votes', c)).to.equal(c + ' komentarja');
-    });
+    }
 
-    forEach([0, 11, 12, 13, 14, 52, 53], function (c) {
+    for (const c of [0, 11, 12, 13, 14, 52, 53]) {
       expect(polyglot.t('n_votes', c)).to.equal(c + ' komentarjev');
-    });
+    }
   });
 
   it('pluralizes in Turkish', function () {
     var whatSomeoneTranslated = [
       'Sepetinizde %{smart_count} X var. Bunu almak istiyor musunuz?',
-      'Sepetinizde %{smart_count} X var. Bunları almak istiyor musunuz?'
+      'Sepetinizde %{smart_count} X var. Bunları almak istiyor musunuz?',
     ];
     var phrases = {
-      n_x_cart: whatSomeoneTranslated.join(' |||| ')
+      n_x_cart: whatSomeoneTranslated.join(' |||| '),
     };
 
     var polyglot = new Polyglot({ phrases: phrases, locale: 'tr' });
 
-    expect(polyglot.t('n_x_cart', 1)).to.equal('Sepetinizde 1 X var. Bunu almak istiyor musunuz?');
-    expect(polyglot.t('n_x_cart', 2)).to.equal('Sepetinizde 2 X var. Bunları almak istiyor musunuz?');
+    expect(polyglot.t('n_x_cart', 1)).to.equal(
+      'Sepetinizde 1 X var. Bunu almak istiyor musunuz?'
+    );
+    expect(polyglot.t('n_x_cart', 2)).to.equal(
+      'Sepetinizde 2 X var. Bunları almak istiyor musunuz?'
+    );
   });
 
   it('pluralizes in Lithuanian', function () {
     var whatSomeoneTranslated = [
       '%{smart_count} balsas',
       '%{smart_count} balsai',
-      '%{smart_count} balsų'
+      '%{smart_count} balsų',
     ];
     var phrases = {
-      n_votes: whatSomeoneTranslated.join(' |||| ')
+      n_votes: whatSomeoneTranslated.join(' |||| '),
     };
     var polyglot = new Polyglot({ phrases: phrases, locale: 'lt' });
 
@@ -509,23 +591,23 @@ describe('custom pluralRules', function () {
         }
         // everything else
         return 1;
-      }
+      },
     },
     pluralTypeToLanguages: {
       germanLike: ['x1'],
-      frenchLike: ['x2']
-    }
+      frenchLike: ['x2'],
+    },
   };
 
   var testPhrases = {
-    test_phrase: '%{smart_count} form zero |||| %{smart_count} form one'
+    test_phrase: '%{smart_count} form zero |||| %{smart_count} form one',
   };
 
   it('pluralizes in x1', function () {
     var polyglot = new Polyglot({
       phrases: testPhrases,
       locale: 'x1',
-      pluralRules: customPluralRules
+      pluralRules: customPluralRules,
     });
 
     expect(polyglot.t('test_phrase', 0)).to.equal('0 form one');
@@ -537,7 +619,7 @@ describe('custom pluralRules', function () {
     var polyglot = new Polyglot({
       phrases: testPhrases,
       locale: 'x2',
-      pluralRules: customPluralRules
+      pluralRules: customPluralRules,
     });
 
     expect(polyglot.t('test_phrase', 0)).to.equal('0 form zero');
@@ -594,13 +676,13 @@ describe('extend', function () {
     polyglot.extend({
       sidebar: {
         click: 'Click',
-        hover: 'Hover'
+        hover: 'Hover',
       },
       nav: {
         header: {
-          log_in: 'Log In'
-        }
-      }
+          log_in: 'Log In',
+        },
+      },
     });
     expect(polyglot.phrases['sidebar.click']).to.equal('Click');
     expect(polyglot.phrases['sidebar.hover']).to.equal('Hover');
@@ -680,30 +762,53 @@ describe('transformPhrase', function () {
     'صوتان',
     '%{smart_count} أصوات',
     '%{smart_count} صوت',
-    '%{smart_count} صوت'
+    '%{smart_count} صوت',
   ].join(' |||| ');
 
   it('does simple interpolation', function () {
-    expect(Polyglot.transformPhrase(simple, { name: 'Polyglot', attribute: 'awesome' })).to.equal('Polyglot is awesome');
+    expect(
+      Polyglot.transformPhrase(simple, {
+        name: 'Polyglot',
+        attribute: 'awesome',
+      })
+    ).to.equal('Polyglot is awesome');
   });
 
   it('removes missing keys', function () {
-    expect(Polyglot.transformPhrase(simple, { name: 'Polyglot' })).to.equal('Polyglot is %{attribute}');
+    expect(Polyglot.transformPhrase(simple, { name: 'Polyglot' })).to.equal(
+      'Polyglot is %{attribute}'
+    );
   });
 
   it('selects the correct plural form based on smart_count', function () {
-    expect(Polyglot.transformPhrase(english, { smart_count: 0 }, 'en')).to.equal('0 Names');
-    expect(Polyglot.transformPhrase(english, { smart_count: 1 }, 'en')).to.equal('1 Name');
-    expect(Polyglot.transformPhrase(english, { smart_count: 2 }, 'en')).to.equal('2 Names');
-    expect(Polyglot.transformPhrase(english, { smart_count: 3 }, 'en')).to.equal('3 Names');
+    expect(
+      Polyglot.transformPhrase(english, { smart_count: 0 }, 'en')
+    ).to.equal('0 Names');
+    expect(
+      Polyglot.transformPhrase(english, { smart_count: 1 }, 'en')
+    ).to.equal('1 Name');
+    expect(
+      Polyglot.transformPhrase(english, { smart_count: 2 }, 'en')
+    ).to.equal('2 Names');
+    expect(
+      Polyglot.transformPhrase(english, { smart_count: 3 }, 'en')
+    ).to.equal('3 Names');
   });
 
   it('selects the correct locale', function () {
     // French rule: "0" is singular
-    expect(Polyglot.transformPhrase(english, { smart_count: 0 }, 'fr')).to.equal('0 Name');
-    expect(Polyglot.transformPhrase(english, { smart_count: 1 }, 'fr')).to.equal('1 Name');
-    expect(Polyglot.transformPhrase(english, { smart_count: 2 }, 'fr')).to.equal('2 Names');
-    expect(Polyglot.transformPhrase(english, { smart_count: 3 }, 'fr')).to.equal('3 Names');
+    expect(
+      Polyglot.transformPhrase(english, { smart_count: 0 }, 'fr')
+    ).to.equal('0 Name');
+    expect(
+      Polyglot.transformPhrase(english, { smart_count: 1 }, 'fr')
+    ).to.equal('1 Name');
+    expect(
+      Polyglot.transformPhrase(english, { smart_count: 2 }, 'fr')
+    ).to.equal('2 Names');
+    expect(
+      Polyglot.transformPhrase(english, { smart_count: 3 }, 'fr')
+    ).to.equal('3 Names');
 
     // Arabic has 6 rules
     expect(Polyglot.transformPhrase(arabic, 0, 'ar')).to.equal('ولا صوت');
@@ -716,12 +821,16 @@ describe('transformPhrase', function () {
 
   it('defaults to `en`', function () {
     // French rule: "0" is singular
-    expect(Polyglot.transformPhrase(english, { smart_count: 0 })).to.equal('0 Names');
+    expect(Polyglot.transformPhrase(english, { smart_count: 0 })).to.equal(
+      '0 Names'
+    );
   });
 
   it('ignores a region subtag when choosing a pluralization rule', function () {
     // French rule: "0" is singular
-    expect(Polyglot.transformPhrase(english, { smart_count: 0 }, 'fr-FR')).to.equal('0 Name');
+    expect(
+      Polyglot.transformPhrase(english, { smart_count: 0 }, 'fr-FR')
+    ).to.equal('0 Name');
   });
 
   it('works without arguments', function () {
@@ -735,9 +844,17 @@ describe('transformPhrase', function () {
   });
 
   it('throws without sane phrase string', function () {
-    expect(function () { Polyglot.transformPhrase(); }).to.throw(TypeError);
-    expect(function () { Polyglot.transformPhrase(null); }).to.throw(TypeError);
-    expect(function () { Polyglot.transformPhrase(32); }).to.throw(TypeError);
-    expect(function () { Polyglot.transformPhrase({}); }).to.throw(TypeError);
+    expect(function () {
+      Polyglot.transformPhrase();
+    }).to.throw(TypeError);
+    expect(function () {
+      Polyglot.transformPhrase(null);
+    }).to.throw(TypeError);
+    expect(function () {
+      Polyglot.transformPhrase(32);
+    }).to.throw(TypeError);
+    expect(function () {
+      Polyglot.transformPhrase({});
+    }).to.throw(TypeError);
   });
 });
